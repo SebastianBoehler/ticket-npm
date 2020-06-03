@@ -1,10 +1,10 @@
 {
   "name": "boehlerio-ticketapi",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "easily integrate our ticket api into your projects",
   "main": "ticket-api.js",
   "scripts": {
-    "test": "npm test"
+    "test": "node ticket-api"
   },
   "keywords": [
     "ticket",
@@ -14,11 +14,10 @@
   "author": "Sebastian Boehler",
   "license": "ISC",
   "dependencies": {
-    "https-proxy-agent": "^5.0.0",
     "node-fetch": "^2.6.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/YourSocialBot/ticket-npm.git"
-}
+  }
 }

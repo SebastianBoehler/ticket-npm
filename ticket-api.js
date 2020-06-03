@@ -1,4 +1,3 @@
-var HttpsProxyAgent = require('https-proxy-agent')
 const fetch = require('node-fetch')
 
 module.exports = class TicketAPI {
