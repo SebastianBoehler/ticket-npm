@@ -11,6 +11,10 @@ module.exports = class TicketAPI {
 
     setProxy(proxy) {
         this.proxy = proxy
+    };
+
+    setUserAgent(UA) {
+        this.UA = UA
     }
 
     async startSession() {
@@ -19,6 +23,7 @@ module.exports = class TicketAPI {
             await fetch(`http://${this.IPAddress}/session`, {
                         method: 'POST',
                         body: JSON.stringify({
+                            "userAgent": this.UA,
                             "key": this.key,
                             "proxy": this.proxy
                         }),
@@ -51,7 +56,7 @@ module.exports = class TicketAPI {
             console.log(this.key)
 
             var body = {
-                "userAgent": UA,
+                "userAgent": this.UA,
                 "cookie": cookies,
                 "key": this.key,
                 "proxy": this.proxy
