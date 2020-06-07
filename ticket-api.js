@@ -19,19 +19,23 @@ module.exports = class TicketAPI {
 
     async startSession() {
         if (!this.IPAddress) return 'Setup IPAddress first!'
+
+        var params = {
+            method: 'POST',
+            body: JSON.stringify({
+                "userAgent": this.UA,
+                "key": this.key,
+                "proxy": this.proxy
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            timeout: 4500
+        }
+
+        if (this.cookie) params['cookie'] = encodeURIComponent(this.cookie.split(';')[0])
         return new Promise(async (resolve, reject) => {
-            await fetch(`http://${this.IPAddress}/session`, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            "userAgent": this.UA,
-                            "key": this.key,
-                            "proxy": this.proxy
-                        }),
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        timeout: 4500
-                    }).then(async resp => {
+            await fetch(`http://${this.IPAddress}/session`, params).then(async resp => {
                         if (resp.status === 503) {
                             reject('invalid request payload! status 503 returned')
                             return
@@ -88,7 +92,7 @@ module.exports = class TicketAPI {
                     }).then(async resp => {
                         console.log(this.cookie.split(';')[0])
                         if (resp.status === 503) {
-                            reject('invalid request payload! status 503 returned')
+                            reject('error occured server-side, check your payload data')
                             return
                         }
                         resp = await resp.json()
