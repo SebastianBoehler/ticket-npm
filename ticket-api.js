@@ -84,7 +84,7 @@ module.exports = class TicketAPI {
                             'Content-Type': 'application/json'
                         },
                         timeout: timeout,
-                        cookie: this.cookie.split(';')[0]
+                        cookie: encodeURIComponent(this.cookie.split(';')[0])
                     }).then(async resp => {
                         console.log(this.cookie.split(';')[0])
                         if (resp.status === 503) {

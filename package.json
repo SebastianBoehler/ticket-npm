@@ -1,6 +1,6 @@
 {
   "name": "boehlerio-ticketapi",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "easily integrate our ticket api into your projects",
   "main": "ticket-api.js",
   "scripts": {
