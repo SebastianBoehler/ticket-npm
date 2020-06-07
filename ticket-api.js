@@ -18,7 +18,6 @@ module.exports = class TicketAPI {
     };
 
     async startSession() {
-        if (this.session) return this.session
         if (!this.IPAddress) return 'Setup IPAddress first!'
         return new Promise(async (resolve, reject) => {
             await fetch(`http://${this.IPAddress}/session`, {
@@ -77,7 +76,7 @@ module.exports = class TicketAPI {
 
             var timeout = 750
             if (!this.session) timeout = 2000
-            console.log(this.cookie)
+            console.log(this.cookie.split(';')[0])
             await fetch(`http://${this.IPAddress}/ticket`, {
                         method: 'POST',
                         body: JSON.stringify(body),
@@ -85,13 +84,15 @@ module.exports = class TicketAPI {
                             'Content-Type': 'application/json'
                         },
                         timeout: timeout,
-                        cookie: this.cookie
+                        cookie: this.cookie.split(';')[0]
                     }).then(async resp => {
+                        console.log(this.cookie.split(';')[0])
                         if (resp.status === 503) {
                             reject('invalid request payload! status 503 returned')
                             return
                         }
                         resp = await resp.json()
+                        //this.session = resp['session']
                         resolve(resp)
                         //console.log(resp['_ticket'])
                         //_ticket = resp['_ticket']
