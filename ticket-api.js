@@ -18,6 +18,7 @@ module.exports = class TicketAPI {
     };
 
     async startSession() {
+        if (this.session) return this.session
         if (!this.IPAddress) return 'Setup IPAddress first!'
         return new Promise(async (resolve, reject) => {
             await fetch(`http://${this.IPAddress}/session`, {
