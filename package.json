@@ -1,10 +1,11 @@
 {
   "name": "boehlerio-ticketapi",
-  "version": "1.0.4",
+  "version": "1.0.8",
   "description": "easily integrate our ticket api into your projects",
   "main": "ticket-api.js",
   "scripts": {
-    "test": "node ticket-api"
+    "test": "node ticket-api",
+    "build": "tsc"
   },
   "keywords": [
     "ticket",
@@ -19,5 +20,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/YourSocialBot/ticket-npm.git"
+  },
+  "devDependencies": {
+    "typescript": "^3.9.5"
   }
 }
