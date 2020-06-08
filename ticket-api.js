@@ -1,7 +1,7 @@
 const fetch = require('node-fetch')
 
 module.exports = class TicketAPI {
-    constructor (key) {
+    constructor(key) {
         this.key = key
     };
 
@@ -17,9 +17,21 @@ module.exports = class TicketAPI {
         this.UA = UA
     };
 
-    async startSession() {
-        if (!this.IPAddress) return 'Setup IPAddress first!'
+    serverSession() {
+        return this.cookie
+    }
 
+    setServerSession(session) {
+        this.cookie = session
+    }
+
+    async startSession() {
+        if (!this.IPAddress) return 'ip address required'
+        else if (!this.proxy) return 'proxy required'
+        if (this.session) {
+            //console.log('session already set')
+            return
+        }
         var params = {
             method: 'POST',
             body: JSON.stringify({
@@ -30,39 +42,49 @@ module.exports = class TicketAPI {
             headers: {
                 'Content-Type': 'application/json'
             },
+            redirect: 'follow',
             timeout: 4500
         }
-
-        if (this.cookie) params['cookie'] = encodeURIComponent(this.cookie.split(';')[0])
+        if (this.cookie) params['headers']['cookie'] = this.cookie
+        //console.log('cookie used', params)
+        //console.log('using proxy for _ticket checkout', this.proxy)
         return new Promise(async (resolve, reject) => {
             await fetch(`http://${this.IPAddress}/session`, params).then(async resp => {
-                        if (resp.status === 503) {
-                            reject('invalid request payload! status 503 returned')
-                            return
-                        }
-                        this.cookie = resp.headers.get("set-cookie")
-                        resp = await resp.json()
-                        this.session = resp['session']
-                        resolve(resp['session'])
+                    if (resp.status === 503) {
+                        console.log(await resp.text())
+                        reject('invalid request payload! status 503 returned')
+                        return
+                    }
+                    try {
+                        const cookie = resp.headers.get("set-cookie").split(';')[0]
+                        this.cookie = cookie
+                    } catch (error) {
                         
-                        //console.log(resp['_ticket'])
-                        //_ticket = resp['_ticket']
-                        //return _ticket
-                    })
-                    .catch(e => {
-                        console.log(e)
-                        reject('failed', e)
-                    })
+                    }
+                    resp = await resp.json()
+                    this.session = resp['session']
+                    console.log('setting session after /session to', this.session)
+                    resolve(resp['session'])
+
+                    //console.log(resp['_ticket'])
+                    //_ticket = resp['_ticket']
+                    //return _ticket
+                })
+                .catch(e => {
+                    //console.log(e)
+                    reject('failed', e)
+                })
         })
     }
 
-    async generateTicket(UA, cookies) {
+    async generateTicket(cookies) {
         if (!this.IPAddress) return 'Setup IPAddress first!'
         return new Promise(async (resolve, reject) => {
-            console.log(this.key)
+            //console.log(this.key)
 
-            if (!this.proxy && !this.session) {
-                reject('Proxy or session required!')
+            if (!this.proxy) {
+                //console.log(this.proxy, this.session)
+                reject('proxy required!')
                 return
             }
 
@@ -74,38 +96,49 @@ module.exports = class TicketAPI {
             }
 
             if (this.session) {
-                body['session'] = this.session
-                console.log('using session:', body['session'])
+                //body['session'] = this.session
+                //console.log('using session:' + body['session'] + ' for ticket gen')
             }
 
-            var timeout = 750
-            if (!this.session) timeout = 2000
-            console.log(this.cookie.split(';')[0])
-            await fetch(`http://${this.IPAddress}/ticket`, {
-                        method: 'POST',
-                        body: JSON.stringify(body),
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        timeout: timeout,
-                        cookie: encodeURIComponent(this.cookie.split(';')[0])
-                    }).then(async resp => {
-                        console.log(this.cookie.split(';')[0])
-                        if (resp.status === 503) {
-                            reject('error occured server-side, check your payload data')
-                            return
-                        }
-                        resp = await resp.json()
-                        //this.session = resp['session']
-                        resolve(resp)
-                        //console.log(resp['_ticket'])
-                        //_ticket = resp['_ticket']
-                        //return _ticket
-                    })
-                    .catch(e => {
-                        console.log(e)
-                        reject('failed', e)
-                    })
+            //console.log(this.cookie.split(';')[0])
+            var params = {
+                method: 'POST',
+                body: JSON.stringify(body),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                timeout: 2000,
+                redirect: 'follow'
+            }
+            if (this.cookie) params['headers']['cookie'] = this.cookie
+
+            //console.log('params for ticket endpoint', params)
+
+            await fetch(`http://${this.IPAddress}/ticket`, params).then(async resp => {
+                    //console.log(this.cookie)
+                    if (resp.status === 503) {
+                        console.log(await resp.text())
+                        reject('error occured! status 503 returned')
+                        return
+                    }
+                    try {
+                        const cookie = resp.headers.get("set-cookie").split(';')[0]
+                        this.cookie = cookie
+                    } catch (error) {
+                        
+                    }
+                    resp = await resp.json()
+                    this.session = resp['session']
+                    //console.log('setting session after /ticket to', this.session)
+                    resolve(resp)
+                    //console.log(resp['_ticket'])
+                    //_ticket = resp['_ticket']
+                    //return _ticket
+                })
+                .catch(e => {
+                    console.log(e)
+                    reject('failed', e || 'test')
+                })
         })
     };
 }

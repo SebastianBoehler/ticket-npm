@@ -20,11 +20,18 @@ myTicket.setProxy('http://127.0.0.10:3000@username:password')
 
 (async () => {
     await myTicket.startSession()
-    const ticket = await myTicket.generateTicket(UA, cookie)
     .catch(e => { 
         console.log(e) 
     })
-    console.log(ticket['_ticket'])
+
+    myTicket.setServerSession(myTicket.serverSession())
+
+    const ticket = await myTicket.generateTicket(cookie)
+    .catch(e => { 
+        console.log(e) 
+    })
+
+    console.log(ticket)
 })()
 ```
 
