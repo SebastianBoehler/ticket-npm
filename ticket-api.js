@@ -80,6 +80,7 @@ module.exports = class TicketAPI {
     async generateTicket(cookies) {
         if (!this.IPAddress) return 'Setup IPAddress first!'
         return new Promise(async (resolve, reject) => {
+            const startTime = new Date()
             //console.log(this.key)
 
             if (!this.proxy) {
@@ -129,7 +130,10 @@ module.exports = class TicketAPI {
                     }
                     resp = await resp.json()
                     this.session = resp['session']
+                    const endTime = new Date()
                     //console.log('setting session after /ticket to', this.session)
+                    resp['timing'] = (endTime.getTime() - startTime.getTime()) / 1000
+                    console.log('Response time', resp['timing'])
                     resolve(resp)
                     //console.log(resp['_ticket'])
                     //_ticket = resp['_ticket']
