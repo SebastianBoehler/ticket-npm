@@ -138,6 +138,13 @@ module.exports = class TicketAPI {
                             headers: params
                         })
                         .then(async resp => {
+                            try {
+                                const cookie = resp.headers.get("set-cookie").split(';')[0]
+                                this.cookie = cookie
+                            } catch (error) {
+        
+                            }
+                            
                             resp = await resp.json()
                             if (resp['success'])  {
                                 this.session = resp['session']

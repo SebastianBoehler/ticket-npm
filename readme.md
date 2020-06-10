@@ -40,3 +40,26 @@ myTicket.setUserAgent(proxy);
 })()
 ```
 
+A successful example response from startSession would look like:
+```
+{
+  success: true,
+  error: [],
+  session: 'JKS5K-SUJKT-1W93W-0I7B8',
+  'received size': 46748,
+  timestamp: 1591797668729
+}
+```
+
+A successful example response from generateTicket would look like:
+```
+{
+  success: true,
+  error: [],
+  'key expiration date': null,
+  session: 'JKS5K-SUJKT-1W93W-0I7B8',
+  _ticket: '_ticket=637836a8844de1cf8587072ad69a75f5116caf39642ef5c6b78512506c516ab1266897df75bdcdcec92b6e74e97a50db7b489e3be221fc1493a9981dcb42b6141591797669',  
+  userAgent: 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Mobile Safari/537.36',
+  timing: '0.205 ms'
+}
+```
