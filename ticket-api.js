@@ -95,11 +95,8 @@ module.exports = class TicketAPI {
 
         if (isErrored) return
 
-        var params = {
-            method: 'POST',
-            timeout: 2000
-        }
-        if (this.cookie) params['headers']['cookie'] = this.cookie
+        var headers = {}
+        if (this.cookie) headers['cookie'] = this.cookie
         //console.log('cookie used', params)
         //console.log('using proxy for _ticket checkout', this.proxy)
         return new Promise(async (resolve, reject) => {
@@ -132,10 +129,10 @@ module.exports = class TicketAPI {
                     upload.append('wasm', fs.createReadStream(path));
                     upload.append('key', this.key);
                     //console.log('upload', upload)
-                    fetch(`http://${this.IPAddress}/upload`, {
+                    await fetch(`http://${this.IPAddress}/upload`, {
                             method: 'POST',
                             body: upload,
-                            headers: params
+                            headers: headers
                         })
                         .then(async resp => {
                             try {
@@ -144,7 +141,7 @@ module.exports = class TicketAPI {
                             } catch (error) {
         
                             }
-                            
+
                             resp = await resp.json()
                             if (resp['success'])  {
                                 this.session = resp['session']
