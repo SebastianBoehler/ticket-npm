@@ -8,30 +8,35 @@ Easily generate _ticket cookies by using our API
 
 # Usage:
 
-We've provided you with a key and the IP address of our US and EU servers if you're allowed to use our API
+We've provided you with a key and the IP address of our US /EU servers if you're allowed to use our API
 
-UserAgent (UA) and cookie/s need to be passed as string
+UserAgent (UA) , proxy and cookie/s need to be passed as string
+
+Example proxy format: "http://username:password@ipAddress:port" // "http://ipAddress:port"
 ```
 const TicketAPI = require('boehlerio-ticketapi')
 const myTicket = new TicketAPI('your-key-here')
 
-myTicket.setIPAddress('127.0.0.10:3000');
-myTicket.setProxy('http://127.0.0.10:3000@username:password')
+myTicket.setIPAddress(ipAddress)
+myTicket.setUserAgent(proxy);
 
 (async () => {
-    await myTicket.startSession()
-    .catch(e => { 
-        console.log(e) 
-    })
+    try {
+        const session = await myTicket.startSession(proxy)
+        .catch(e => {
+            console.log('error', e)
+        })
 
-    myTicket.setServerSession(myTicket.serverSession())
 
-    const ticket = await myTicket.generateTicket(cookie)
-    .catch(e => { 
-        console.log(e) 
-    })
+        const ticket = await myTicket.generateTicket(cookie)
+        .catch(e => {
+            console.log('error', e)
+        }) 
 
-    console.log(ticket)
+        console.log(ticket)
+    } catch (error) {
+        console.log(error)
+    }
 })()
 ```
 
