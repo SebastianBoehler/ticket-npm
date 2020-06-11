@@ -85,7 +85,6 @@ module.exports = class TicketAPI {
         var isErrored = false
 
         if (!this.IPAddress) return 'ip address required'
-        else if (!proxy) return 'proxy required'
 
         const wasmbinsrc = await source()
             .catch(e => {
@@ -99,17 +98,20 @@ module.exports = class TicketAPI {
         if (this.cookie) headers['cookie'] = this.cookie
         //console.log('cookie used', params)
         //console.log('using proxy for _ticket checkout', this.proxy)
+        var params = {
+            headers: {
+                "cache-control": "no-cache",
+                "pragma": "no-cache",
+                "referrer": "https://www.supremenewyork.com/mobile",
+                "Connection": "keep-alive"
+            },
+            timeout: 2500,
+        }
+
+        if (proxy) params['agent'] = new HttpsProxyAgent(proxy)
+
         return new Promise(async (resolve, reject) => {
-            await fetch(wasmbinsrc, {
-                    headers: {
-                        "cache-control": "no-cache",
-                        "pragma": "no-cache",
-                        "referrer": "https://www.supremenewyork.com/mobile",
-                        "Connection": "keep-alive"
-                    },
-                    timeout: 2500,
-                    agent: new HttpsProxyAgent(proxy)
-                })
+            await fetch(wasmbinsrc, params)
                 .then(async resp => {
                     const path = __dirname + `/${await rndString()}.wasm`
                     console.log('requested wasm')
