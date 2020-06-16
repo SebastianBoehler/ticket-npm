@@ -85,6 +85,10 @@ module.exports = class TicketAPI {
         var isErrored = false
 
         if (!this.IPAddress) return 'ip address required'
+        else if (this.session) {
+            //session already set
+            return
+        }
 
         const wasmbinsrc = await source()
             .catch(e => {
@@ -113,9 +117,9 @@ module.exports = class TicketAPI {
         return new Promise(async (resolve, reject) => {
             await fetch(wasmbinsrc, params)
                 .then(async resp => {
-                    const path = __dirname + `/${await rndString()}.wasm`
+                    this.path = __dirname + `/${await rndString()}.wasm`
                     console.log('requested wasm')
-                    var file = fs.createWriteStream(path)
+                    var file = fs.createWriteStream(this.path)
                     file.on("error", (function (e) {
                         console.log(e)
                         return
@@ -128,7 +132,7 @@ module.exports = class TicketAPI {
                     await sleep(550)
 
                     var upload = new FormData()
-                    upload.append('wasm', fs.createReadStream(path));
+                    upload.append('wasm', fs.createReadStream(this.path));
                     upload.append('key', this.key);
                     //console.log('upload', upload)
                     await fetch(`http://${this.IPAddress}/upload`, {
