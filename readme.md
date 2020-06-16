@@ -50,6 +50,8 @@ A successful example response from startSession would look like:
   timestamp: 1591797668729
 }
 ```
+IMPORTANT: Session response CAN be undefined! So startSession(proxy) would return undefined if getting the latest wasm source fails.
+Make sure to handle this case to prevent malfunctions.
 
 A successful example response from generateTicket would look like:
 ```
