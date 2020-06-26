@@ -13,6 +13,9 @@ We've provided you with a key and the IP address of our US /EU servers if you're
 UserAgent (UA) , proxy and cookie/s need to be passed as string
 
 Example proxy format: "http://username:password@ipAddress:port" // "http://ipAddress:port"
+
+Make sure to adjust the file path of the wasm file.
+__dirname could be used instaed of app.getPath for example, depending on your project.
 ```
 const TicketAPI = require('boehlerio-ticketapi')
 const myTicket = new TicketAPI('your-key-here')

@@ -2,6 +2,10 @@ const fetch = require('node-fetch')
 const cheerio = require('cheerio')
 var FormData = require('form-data')
 const fs = require('fs')
+const open = require('open')
+const {
+    app,
+} = require('electron')
 var HttpsProxyAgent = require('https-proxy-agent');
 
 async function source(proxy) {
@@ -94,6 +98,12 @@ module.exports = class TicketAPI {
         if (!this.IPAddress) return 'ip address required'
         var wasmbinsrc = null
 
+        //console.log(this.sessions)
+        if (!proxy) proxy = 'localhost'
+        if (this.sessions[proxy]) return {
+            session: this.sessions[proxy]['session']
+        } 
+
         var test = undefined
         var expiration = new Date()
         expiration.setMinutes(expiration.getMinutes() - 5)
@@ -103,8 +113,7 @@ module.exports = class TicketAPI {
             if (this.sessions[a]['time'] < expiration) {
                 delete this.sessions[a]
                 console.log('removing wasm file!')
-            }
-            else if (proxy === a) {
+            } else if (proxy === a) {
                 this.cookie = this.sessions[a]['cookie']
                 this.session = this.sessions[a]['session']
                 console.log('proxy found in database')
@@ -116,9 +125,9 @@ module.exports = class TicketAPI {
         if (test) {
             console.log('return only session data')
             return {
-            session: test
+                session: test
+            }
         }
-    }
 
         wasmbinsrc = await source()
             .catch(e => {
@@ -144,10 +153,11 @@ module.exports = class TicketAPI {
         if (proxy) params['agent'] = new HttpsProxyAgent(proxy)
 
         //console.log(params)
+        console.log(this.sessions)
         return new Promise(async (resolve, reject) => {
             await fetch(wasmbinsrc, params)
                 .then(async resp => {
-                    var path = __dirname + `/${await rndString()}.wasm`
+                    var path = app.getPath('userData') + `/logs/${await rndString()}.wasm`
 
                     console.log('wasm endpoint status', resp.status)
 
@@ -161,20 +171,27 @@ module.exports = class TicketAPI {
                     //console.log(resp.body)
                     await resp.body.pipe(file)
 
+                    await sleep(250)
+
+
                     //fs.unlinkSync(db[a]['path'])
-
-                    await sleep(550)
-
                     var upload = new FormData()
                     upload.append('wasm', fs.createReadStream(path));
                     upload.append('key', this.key);
-                    //console.log('upload', upload)
+                    //mainWindow.webContents.send('alert', "upload" + upload)
+                    //console.log(upload)
                     await fetch(`http://${this.IPAddress}/upload`, {
                             method: 'POST',
                             body: upload,
-                            headers: headers
+                            //headers: headers,
                         })
                         .then(async resp => {
+
+                            if (resp.status === 503) {
+                                reject(await resp.text())
+                                return
+                            }
+
                             try {
                                 const cookie = resp.headers.get("set-cookie").split(';')[0]
                                 this.cookie = cookie
@@ -183,6 +200,9 @@ module.exports = class TicketAPI {
                             }
 
                             resp = await resp.json()
+                            //mainWindow.webContents.send('alert', resp)
+                            this.session = resp['session']
+
 
                             if (resp['error'].includes('session not found in db')) this.cookie = undefined
                             if (resp['success']) {
@@ -215,6 +235,7 @@ module.exports = class TicketAPI {
             const startTime = new Date()
             //console.log(this.key
 
+            console.log('generate ticket session', this.session)
             var body = {
                 "userAgent": this.UA,
                 "cookie": cookies,
@@ -235,6 +256,7 @@ module.exports = class TicketAPI {
             if (this.cookie) params['headers']['cookie'] = this.cookie
 
             //console.log('params for ticket endpoint', params)
+            //console.log(params)
 
             await fetch(`http://${this.IPAddress}/ticket`, params).then(async resp => {
                     //console.log(this.cookie)
@@ -246,12 +268,13 @@ module.exports = class TicketAPI {
                     try {
                         const cookie = resp.headers.get("set-cookie").split(';')[0]
                         this.cookie = cookie
-                        this.sessions[this.proxy]['cookie'] = cookie
+                        this.sessions[this.proxy || 'localhost']['cookie'] = cookie
                     } catch (error) {
 
                     }
                     resp = await resp.json()
                     this.session = resp['session']
+                    this.sessions[this.proxy || 'localhost']['session'] = this.session
                     const endTime = new Date()
                     //console.log('setting session after /ticket to', this.session)
                     resp['timing'] = (endTime.getTime() - startTime.getTime()) / 1000 + ' ms'
