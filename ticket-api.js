@@ -92,17 +92,21 @@ module.exports = class TicketAPI {
         var headers = {}
         var isErrored = false
 
-        //console.log('received proxy', proxy)
-        this.proxy = proxy
+        console.log('received proxy', proxy)
 
         if (!this.IPAddress) return 'ip address required'
         var wasmbinsrc = null
 
         //console.log(this.sessions)
         if (!proxy) proxy = 'localhost'
-        if (this.sessions[proxy]) return {
+        if (this.sessions[proxy]) {
+            this.cookie = this.sessions[proxy]['cookie']
+            this.session = this.sessions[proxy]['session']
+            return {
             session: this.sessions[proxy]['session']
         } 
+    }
+    this.proxy = proxy
 
         var test = undefined
         var expiration = new Date()
@@ -150,7 +154,7 @@ module.exports = class TicketAPI {
             timeout: 2500,
         }
 
-        if (proxy) params['agent'] = new HttpsProxyAgent(proxy)
+        if (proxy !== 'localhost') params['agent'] = new HttpsProxyAgent(proxy)
 
         //console.log(params)
         console.log(this.sessions)
