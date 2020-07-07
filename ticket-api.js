@@ -7,6 +7,7 @@ const {
     app,
 } = require('electron')
 var HttpsProxyAgent = require('https-proxy-agent');
+const { time } = require('console')
 
 async function source(proxy) {
     return new Promise((resolve, reject) => {
@@ -239,12 +240,16 @@ module.exports = class TicketAPI {
             const startTime = new Date()
             //console.log(this.key
 
+            var timestamp = new Date()
+            timestamp.setMilliseconds(timestamp.getMilliseconds() + 80)
+
             console.log('generate ticket session', this.session)
             var body = {
                 "userAgent": this.UA,
                 "cookie": cookies,
                 "key": this.key,
-                "session": this.session
+                "session": this.session,
+                "timestamp": timestamp.getTime()
             }
 
             //console.log(this.session)
