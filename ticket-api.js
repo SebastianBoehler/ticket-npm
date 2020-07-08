@@ -241,7 +241,7 @@ module.exports = class TicketAPI {
             //console.log(this.key
 
             var timestamp = new Date()
-            timestamp.setMilliseconds(timestamp.getMilliseconds() + 350)
+            timestamp.setMilliseconds(timestamp.getMilliseconds() + 600)
 
             console.log('generate ticket session', this.session)
             var body = {
