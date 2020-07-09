@@ -7,7 +7,9 @@ const {
     app,
 } = require('electron')
 var HttpsProxyAgent = require('https-proxy-agent');
-const { time } = require('console')
+const {
+    time
+} = require('console')
 
 async function source(proxy) {
     return new Promise((resolve, reject) => {
@@ -98,20 +100,9 @@ module.exports = class TicketAPI {
         if (!this.IPAddress) return 'ip address required'
         var wasmbinsrc = null
 
-        //console.log(this.sessions)
-        if (!proxy) proxy = 'localhost'
-        if (this.sessions[proxy]) {
-            this.cookie = this.sessions[proxy]['cookie']
-            this.session = this.sessions[proxy]['session']
-            return {
-            session: this.sessions[proxy]['session']
-        } 
-    }
-    this.proxy = proxy
-
         var test = undefined
         var expiration = new Date()
-        expiration.setMinutes(expiration.getMinutes() - 5)
+        expiration.setMinutes(expiration.getMinutes() - 1)
 
         for (var a in this.sessions) {
             //console.log(a, proxy)
@@ -133,6 +124,17 @@ module.exports = class TicketAPI {
                 session: test
             }
         }
+
+        //console.log(this.sessions)
+        if (!proxy) proxy = 'localhost'
+        if (this.sessions[proxy]) {
+            this.cookie = this.sessions[proxy]['cookie']
+            this.session = this.sessions[proxy]['session']
+            return {
+                session: this.sessions[proxy]['session']
+            }
+        }
+        this.proxy = proxy
 
         wasmbinsrc = await source()
             .catch(e => {
@@ -241,7 +243,7 @@ module.exports = class TicketAPI {
             //console.log(this.key
 
             var timestamp = new Date()
-            timestamp.setMilliseconds(timestamp.getMilliseconds() + 600)
+            timestamp.setMilliseconds(timestamp.getMilliseconds() + 550)
 
             console.log('generate ticket session', this.session)
             var body = {
